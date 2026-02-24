@@ -37,6 +37,20 @@ function stripHtml(input: string) {
   return input.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
+function decodeHtmlEntities(input: string) {
+  const $ = load(`<div>${input}</div>`);
+  return $("div").text().trim();
+}
+
+function escapeHtml(input: string) {
+  return input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function toUtcIso(params: {
   year: number;
   month: number;
@@ -101,6 +115,7 @@ function parseFullRangeWithOffset(text: string, offset: string) {
     minute: Number(match[10]),
     offset
   });
+
   return {
     startAtUtc,
     endAtUtc
@@ -223,7 +238,7 @@ function decodeBody(bytes: Uint8Array, rawCharset: string | null | undefined) {
 async function fetchBytes(url: string, accept: string) {
   const response = await fetch(url, {
     headers: {
-      "User-Agent": "SubcultureHubPickupCollector/1.1",
+      "User-Agent": "SubcultureHubPickupCollector/1.2",
       Accept: accept
     }
   });
@@ -273,7 +288,7 @@ async function collectGenshin(): Promise<PickupItem[]> {
     output.push({
       game: "Genshin Impact",
       region: "Global",
-      title: detail.data?.sTitle ?? item.sTitle,
+      title: decodeHtmlEntities(detail.data?.sTitle ?? item.sTitle),
       startAtUtc: range?.startAtUtc ?? parseApiDateWithOffset(item.dtStartTime, "+08:00"),
       endAtUtc: range?.endAtUtc ?? null,
       sourceUrl: detailUrl
@@ -344,7 +359,7 @@ async function collectZZZ(): Promise<PickupItem[]> {
     output.push({
       game: "Zenless Zone Zero",
       region: "Global",
-      title: detail.data?.sTitle ?? item.sTitle,
+      title: decodeHtmlEntities(detail.data?.sTitle ?? item.sTitle),
       startAtUtc: range?.startAtUtc ?? parseApiDateWithOffset(detail.data?.dtStartTime ?? item.dtStartTime, "+08:00"),
       endAtUtc: range?.endAtUtc ?? null,
       sourceUrl: detailUrl
@@ -370,7 +385,7 @@ async function collectBlueArchive(): Promise<PickupItem[]> {
     output.push({
       game: "Blue Archive",
       region: "KR",
-      title: detail.title ?? thread.title,
+      title: decodeHtmlEntities(detail.title ?? thread.title),
       startAtUtc,
       endAtUtc,
       sourceUrl: `https://forum.nexon.com/bluearchive/board_view?thread=${thread.threadId}`
@@ -413,7 +428,7 @@ async function collectProjectSekaiGlobal(): Promise<PickupItem[]> {
     output.push({
       game: "Project SEKAI (Colorful Stage!)",
       region: "Global",
-      title,
+      title: decodeHtmlEntities(title),
       startAtUtc: range?.startAtUtc ?? null,
       endAtUtc: range?.endAtUtc ?? null,
       sourceUrl: detailUrl
@@ -451,7 +466,7 @@ async function collectFGO(): Promise<PickupItem[]> {
     output.push({
       game: "Fate/Grand Order",
       region: "JP",
-      title: item.title,
+      title: decodeHtmlEntities(item.title),
       startAtUtc: range?.startAtUtc ?? null,
       endAtUtc: range?.endAtUtc ?? null,
       sourceUrl: detailUrl
@@ -478,6 +493,58 @@ function toMarkdown(items: PickupItem[]) {
 
   lines.push("");
   return lines.join("\n");
+}
+
+function toHtml(items: PickupItem[]) {
+  const rows = items
+    .map((item) => {
+      const title = item.note ? `${item.title} (${item.note})` : item.title;
+      return `<tr>
+  <td>${escapeHtml(item.game)}</td>
+  <td>${escapeHtml(item.region)}</td>
+  <td>${escapeHtml(title)}</td>
+  <td>${escapeHtml(item.startAtUtc ?? "-")}</td>
+  <td>${escapeHtml(item.endAtUtc ?? "-")}</td>
+  <td><a href="${escapeHtml(item.sourceUrl)}" target="_blank" rel="noreferrer">source</a></td>
+</tr>`;
+    })
+    .join("\n");
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pickup Snapshot</title>
+  <style>
+    body { font-family: "Noto Sans KR", "Segoe UI", sans-serif; margin: 24px; color: #1d2a2a; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #d8d0c2; padding: 8px; vertical-align: top; text-align: left; }
+    th { background: #f4efe6; }
+    tr:nth-child(even) { background: #fcfaf5; }
+    a { color: #0e7f6d; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <h1>Pickup Snapshot</h1>
+  <p>Generated at: ${escapeHtml(new Date().toISOString())}</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Game</th>
+        <th>Region</th>
+        <th>Title</th>
+        <th>Start (UTC)</th>
+        <th>End (UTC)</th>
+        <th>Source</th>
+      </tr>
+    </thead>
+    <tbody>
+${rows}
+    </tbody>
+  </table>
+</body>
+</html>`;
 }
 
 async function main() {
@@ -528,6 +595,7 @@ async function main() {
   const datePart = new Date().toISOString().slice(0, 10);
   const jsonPath = path.join(outDir, `pickup_snapshot_${datePart}.json`);
   const mdPath = path.join(outDir, `pickup_snapshot_${datePart}.md`);
+  const htmlPath = path.join(outDir, `pickup_snapshot_${datePart}.html`);
 
   await fs.writeFile(
     jsonPath,
@@ -543,11 +611,13 @@ async function main() {
     ),
     "utf8"
   );
-  await fs.writeFile(mdPath, toMarkdown(sorted), "utf8");
+  await fs.writeFile(mdPath, `\uFEFF${toMarkdown(sorted)}`, "utf8");
+  await fs.writeFile(htmlPath, toHtml(sorted), "utf8");
 
   console.log(`Collected ${sorted.length} pickup records.`);
   console.log(`JSON: ${jsonPath}`);
   console.log(`Markdown: ${mdPath}`);
+  console.log(`HTML: ${htmlPath}`);
   if (failures.length > 0) {
     console.log("Failures:");
     for (const failure of failures) {

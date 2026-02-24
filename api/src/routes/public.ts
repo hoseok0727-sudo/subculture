@@ -1,4 +1,6 @@
 ﻿import { Router } from "express";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { z } from "zod";
 import { pool } from "../db.js";
 import { asyncRoute, csvToEnumArray, csvToIntArray } from "./helpers.js";
@@ -98,6 +100,48 @@ publicRouter.get(
         code: row.code,
         timezone: row.timezone
       }))
+    });
+  })
+);
+
+publicRouter.get(
+  "/pickup-snapshot/latest",
+  asyncRoute(async (_req, res) => {
+    const reportsDir = path.resolve(process.cwd(), "reports");
+    const files = await fs.readdir(reportsDir).catch(() => []);
+    const latest = files
+      .filter((file) => /^pickup_snapshot_\d{4}-\d{2}-\d{2}\.json$/.test(file))
+      .sort()
+      .at(-1);
+
+    if (!latest) {
+      res.status(404).json({ error: "Pickup snapshot report not found" });
+      return;
+    }
+
+    const fullPath = path.join(reportsDir, latest);
+    const raw = await fs.readFile(fullPath, "utf8");
+    const parsed = JSON.parse(raw.replace(/^\uFEFF/, "")) as {
+      generatedAt: string;
+      itemCount: number;
+      failures: string[];
+      items: Array<{
+        game: string;
+        region: string;
+        title: string;
+        startAtUtc: string | null;
+        endAtUtc: string | null;
+        sourceUrl: string;
+        note?: string;
+      }>;
+    };
+
+    res.json({
+      file: latest,
+      generatedAt: parsed.generatedAt,
+      itemCount: parsed.itemCount,
+      failures: parsed.failures,
+      items: parsed.items
     });
   })
 );

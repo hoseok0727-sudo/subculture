@@ -249,6 +249,28 @@ button:disabled {
   background: #fff;
 }
 
+.table-wrap {
+  overflow-x: auto;
+}
+
+.snapshot-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 820px;
+}
+
+.snapshot-table th,
+.snapshot-table td {
+  border: 1px solid var(--stroke);
+  padding: 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.snapshot-table th {
+  background: #f7f2e8;
+}
+
 .muted {
   color: var(--muted);
   font-size: 14px;

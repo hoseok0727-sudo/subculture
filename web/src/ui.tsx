@@ -52,6 +52,7 @@ export function AppHeader({ user, onLogout }: { user: User | null; onLogout: () 
       </div>
       <nav className="nav-links">
         <NavLink to="/feed">All Feed</NavLink>
+        <NavLink to="/pickup-snapshot">Pickup Snapshot</NavLink>
         <NavLink to="/my-feed">My Feed</NavLink>
         <NavLink to="/settings">Settings</NavLink>
         {user?.role === "ADMIN" ? <NavLink to="/admin">Admin</NavLink> : null}

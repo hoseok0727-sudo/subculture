@@ -1,6 +1,6 @@
-# Pickup Snapshot
+﻿# Pickup Snapshot
 
-Generated at: 2026-02-24T16:34:06.463Z
+Generated at: 2026-02-24T17:07:32.867Z
 
 | Game | Region | Title | Start (UTC) | End (UTC) | Source |
 |---|---|---|---|---|---|
@@ -12,7 +12,7 @@ Generated at: 2026-02-24T16:34:06.463Z
 | Honkai: Star Rail | Global | Version Pickup Highlights: Yao Guang, Sparxie (Parsed from latest official update notice.) | 2026-02-12T23:00:00.000Z | 2026-03-24T22:00:00.000Z | https://sg-public-api-static.hoyoverse.com/content_v2_user/app/113fe6d3b4514cdd/getContent?iAppId=34&iInfoId=162706&sLangKey=en-us |
 | Blue Archive | KR | 2/10(화) 픽업 모집 안내 | 2026-02-09T09:00:00.000Z | 2026-02-24T01:59:00.000Z | https://forum.nexon.com/bluearchive/board_view?thread=3370136 |
 | Zenless Zone Zero | Global | V2.6 Limited-Time Channels (Phase I) | 2026-02-04T04:45:00.000Z | - | https://sg-public-api-static.hoyoverse.com/content_v2_user/app/3e9196a4b9274bd7/getContent?iAppId=42&iInfoId=162496&sLangKey=en-us |
-| Blue Archive | KR | 1/27(화) 픽업 모집 &amp; 특별 픽업 모집 안내 | 2026-01-26T09:00:00.000Z | 2026-02-10T01:59:00.000Z | https://forum.nexon.com/bluearchive/board_view?thread=3355907 |
+| Blue Archive | KR | 1/27(화) 픽업 모집 & 특별 픽업 모집 안내 | 2026-01-26T09:00:00.000Z | 2026-02-10T01:59:00.000Z | https://forum.nexon.com/bluearchive/board_view?thread=3355907 |
 | Genshin Impact | Global | Version "Luna IV" Event Wishes Notice - Phase II | 2026-01-12T04:05:00.000Z | - | https://sg-public-api-static.hoyoverse.com/content_v2_user/app/a1b1f9d3315447cc/getContent?iAppId=32&iInfoId=162090&sLangKey=en-us |
 | Zenless Zone Zero | Global | V2.5 Limited-Time Channels | 2025-12-28T04:15:00.000Z | - | https://sg-public-api-static.hoyoverse.com/content_v2_user/app/3e9196a4b9274bd7/getContent?iAppId=42&iInfoId=161695&sLangKey=en-us |
 | Zenless Zone Zero | Global | Signal Search Probability Details | 2024-07-04T02:00:00.000Z | - | https://sg-public-api-static.hoyoverse.com/content_v2_user/app/3e9196a4b9274bd7/getContent?iAppId=42&iInfoId=123483&sLangKey=en-us |

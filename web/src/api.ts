@@ -104,6 +104,24 @@ export type IngestRun = {
   regionCode: string | null;
 };
 
+export type PickupSnapshotItem = {
+  game: string;
+  region: string;
+  title: string;
+  startAtUtc: string | null;
+  endAtUtc: string | null;
+  sourceUrl: string;
+  note?: string;
+};
+
+export type PickupSnapshot = {
+  file: string;
+  generatedAt: string;
+  itemCount: number;
+  failures: string[];
+  items: PickupSnapshotItem[];
+};
+
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:4000";
 
 class ApiError extends Error {
@@ -188,6 +206,10 @@ export async function getEvents(params: {
 
 export async function getEventById(id: number, token?: string) {
   return fetchJson<EventItem>(`/api/events/${id}`, { token });
+}
+
+export async function getPickupSnapshotLatest() {
+  return fetchJson<PickupSnapshot>("/api/pickup-snapshot/latest");
 }
 
 export async function getMyFeed(token: string) {

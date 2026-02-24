@@ -7,6 +7,7 @@ import { FeedPage } from "./pages/FeedPage";
 import { EventDetailPage } from "./pages/EventDetailPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { AdminPage } from "./pages/AdminPage";
+import { PickupSnapshotPage } from "./pages/PickupSnapshotPage";
 
 function ProtectedRoute({ authenticated, children }: { authenticated: boolean; children: JSX.Element }) {
   if (!authenticated) {
@@ -37,6 +38,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/feed" replace />} />
           <Route path="/feed" element={<FeedPage mode="all" token={token} />} />
+          <Route path="/pickup-snapshot" element={<PickupSnapshotPage />} />
           <Route path="/events/:eventId" element={<EventDetailPage token={token} />} />
 
           <Route path="/login" element={user ? <Navigate to="/my-feed" replace /> : <LoginPage />} />

@@ -1,0 +1,21 @@
+# Pickup Snapshot
+
+Generated at: 2026-02-24T16:34:06.463Z
+
+| Game | Region | Title | Start (UTC) | End (UTC) | Source |
+|---|---|---|---|---|---|
+| Genshin Impact | Global | An Invitation From the Wind: "Ode to the Dawn Breeze" Chronicled Wish | 2026-02-24T10:00:00.000Z | - | https://sg-public-api-static.hoyoverse.com/content_v2_user/app/a1b1f9d3315447cc/getContent?iAppId=32&iInfoId=162724&sLangKey=en-us |
+| Blue Archive | KR | 2/24(화) 픽업 모집 안내 | 2026-02-23T09:00:00.000Z | 2026-03-03T01:59:00.000Z | https://forum.nexon.com/bluearchive/board_view?thread=3382973 |
+| Genshin Impact | Global | Version "Luna V" Event Wishes Notice - Phase I | 2026-02-23T04:00:00.000Z | - | https://sg-public-api-static.hoyoverse.com/content_v2_user/app/a1b1f9d3315447cc/getContent?iAppId=32&iInfoId=162721&sLangKey=en-us |
+| Fate/Grand Order | JP | 【追記・更新】【期間限定】「バレンタイン2026ピックアップ2召喚」！ | 2026-02-16T09:00:00.000Z | 2026-03-06T03:59:00.000Z | https://news.fate-go.jp/2026/02/valentine2026_pu2/ |
+| Fate/Grand Order | JP | 【期間限定】「バレンタイン2026 デメテルピックアップ召喚」！ | 2026-02-13T09:00:00.000Z | 2026-03-06T03:59:00.000Z | https://news.fate-go.jp/2026/02/valentine2026_pu/ |
+| Honkai: Star Rail | Global | Version Pickup Highlights: Yao Guang, Sparxie (Parsed from latest official update notice.) | 2026-02-12T23:00:00.000Z | 2026-03-24T22:00:00.000Z | https://sg-public-api-static.hoyoverse.com/content_v2_user/app/113fe6d3b4514cdd/getContent?iAppId=34&iInfoId=162706&sLangKey=en-us |
+| Blue Archive | KR | 2/10(화) 픽업 모집 안내 | 2026-02-09T09:00:00.000Z | 2026-02-24T01:59:00.000Z | https://forum.nexon.com/bluearchive/board_view?thread=3370136 |
+| Zenless Zone Zero | Global | V2.6 Limited-Time Channels (Phase I) | 2026-02-04T04:45:00.000Z | - | https://sg-public-api-static.hoyoverse.com/content_v2_user/app/3e9196a4b9274bd7/getContent?iAppId=42&iInfoId=162496&sLangKey=en-us |
+| Blue Archive | KR | 1/27(화) 픽업 모집 &amp; 특별 픽업 모집 안내 | 2026-01-26T09:00:00.000Z | 2026-02-10T01:59:00.000Z | https://forum.nexon.com/bluearchive/board_view?thread=3355907 |
+| Genshin Impact | Global | Version "Luna IV" Event Wishes Notice - Phase II | 2026-01-12T04:05:00.000Z | - | https://sg-public-api-static.hoyoverse.com/content_v2_user/app/a1b1f9d3315447cc/getContent?iAppId=32&iInfoId=162090&sLangKey=en-us |
+| Zenless Zone Zero | Global | V2.5 Limited-Time Channels | 2025-12-28T04:15:00.000Z | - | https://sg-public-api-static.hoyoverse.com/content_v2_user/app/3e9196a4b9274bd7/getContent?iAppId=42&iInfoId=161695&sLangKey=en-us |
+| Zenless Zone Zero | Global | Signal Search Probability Details | 2024-07-04T02:00:00.000Z | - | https://sg-public-api-static.hoyoverse.com/content_v2_user/app/3e9196a4b9274bd7/getContent?iAppId=42&iInfoId=123483&sLangKey=en-us |
+| Project SEKAI (Colorful Stage!) | Global | 2026 Valentine Premium Gift Gacha | - | - | https://www.colorfulstage.com/news/detail/000993.html |
+| Project SEKAI (Colorful Stage!) | Global | 2026 New Year Party Premium Gift Gacha | - | - | https://www.colorfulstage.com/news/detail/000969.html |
+| Project SEKAI (Colorful Stage!) | Global | 2026 January Premium Gift Gacha | - | - | https://www.colorfulstage.com/news/detail/000960.html |

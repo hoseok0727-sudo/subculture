@@ -9,7 +9,8 @@
     "build": "tsc -p tsconfig.json",
     "migrate": "tsx src/migrate.ts",
     "seed": "tsx src/seed.ts",
-    "test": "node --import tsx --test src/tests/**/*.test.ts"
+    "test": "node --import tsx --test src/tests/**/*.test.ts",
+    "pickups:test": "tsx src/scripts/collect-pickups.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

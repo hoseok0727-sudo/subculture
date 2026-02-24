@@ -1,0 +1,17 @@
+{
+  "name": "subculture",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "api",
+    "web",
+    "worker"
+  ],
+  "scripts": {
+    "dev:api": "npm --workspace api run dev",
+    "dev:web": "npm --workspace web run dev",
+    "dev:worker": "npm --workspace worker run dev",
+    "migrate": "npm --workspace api run migrate",
+    "seed": "npm --workspace api run seed"
+  }
+}

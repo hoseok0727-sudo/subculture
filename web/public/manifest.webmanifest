@@ -1,0 +1,16 @@
+﻿{
+  "name": "Subculture Hub",
+  "short_name": "SubHub",
+  "start_url": "/feed",
+  "display": "standalone",
+  "background_color": "#f4efe6",
+  "theme_color": "#0e7f6d",
+  "description": "Subculture mobile game pickup and update hub",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

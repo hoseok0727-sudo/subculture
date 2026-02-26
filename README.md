@@ -28,6 +28,8 @@ Users can select their games and define alert rules. Admin can manage sources an
   - dispatch due notifications (simulated send + delivery logs)
 - Frontend:
   - responsive UI for feed/my-feed/settings/admin
+  - landing dashboard (`/`) with today stats + highlights
+  - pickup snapshot visual page (`/pickup-snapshot`)
   - event detail quick rule actions
   - PWA basics (manifest + service worker registration)
 
@@ -97,6 +99,7 @@ docker compose up --build
   - `GET /api/games`
   - `GET /api/events`
   - `GET /api/events/:id`
+  - `GET /api/pickup-snapshot/latest`
 - Auth
   - `POST /api/auth/signup`
   - `POST /api/auth/login`
@@ -122,3 +125,26 @@ docker compose up --build
 - `npm --workspace web run build`
 - `npm --workspace worker run build`
 - `npm --workspace api run test`
+
+## Pickup snapshot quick test
+
+1. Generate latest snapshot data
+
+```bash
+npm --workspace api run pickups:test
+```
+
+2. Run API + web
+
+```bash
+npm run dev:api
+npm run dev:web
+```
+
+3. Open pages
+
+- Home dashboard: `http://localhost:5173/`
+- Pickup snapshot: `http://localhost:5173/pickup-snapshot`
+
+> Images in snapshot are loaded from official notice pages by URL.
+> Copyright remains with each publisher.

@@ -111,6 +111,7 @@ export type PickupSnapshotItem = {
   startAtUtc: string | null;
   endAtUtc: string | null;
   sourceUrl: string;
+  imageUrl?: string | null;
   note?: string;
 };
 
@@ -119,6 +120,7 @@ export type PickupSnapshot = {
   generatedAt: string;
   itemCount: number;
   failures: string[];
+  copyrightNotice?: string;
   items: PickupSnapshotItem[];
 };
 

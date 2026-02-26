@@ -24,6 +24,11 @@ export function EventCard({ item }: { item: EventItem }) {
   return (
     <li className="event-item">
       <Link to={`/events/${item.id}`}>
+        {item.imageUrl ? (
+          <div className="event-image-wrap">
+            <img src={item.imageUrl} alt={item.title} loading="lazy" />
+          </div>
+        ) : null}
         <div className="event-head">
           <EventBadge type={item.type} />
           <strong>{item.title}</strong>
@@ -48,9 +53,10 @@ export function AppHeader({ user, onLogout }: { user: User | null; onLogout: () 
   return (
     <header className="topbar">
       <div className="brand">
-        <Link to="/feed">Subculture Hub</Link>
+        <Link to="/">Subculture Hub</Link>
       </div>
       <nav className="nav-links">
+        <NavLink to="/">Home</NavLink>
         <NavLink to="/feed">All Feed</NavLink>
         <NavLink to="/pickup-snapshot">Pickup Snapshot</NavLink>
         <NavLink to="/my-feed">My Feed</NavLink>

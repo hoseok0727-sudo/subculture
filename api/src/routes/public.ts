@@ -132,6 +132,7 @@ publicRouter.get(
         startAtUtc: string | null;
         endAtUtc: string | null;
         sourceUrl: string;
+        imageUrl?: string | null;
         note?: string;
       }>;
     };
@@ -141,7 +142,8 @@ publicRouter.get(
       generatedAt: parsed.generatedAt,
       itemCount: parsed.itemCount,
       failures: parsed.failures,
-      items: parsed.items
+      items: parsed.items,
+      copyrightNotice: "Images are loaded from official notice pages and remain property of each publisher."
     });
   })
 );

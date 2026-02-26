@@ -1,4 +1,4 @@
-import { load } from "cheerio";
+﻿import { load } from "cheerio";
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -9,6 +9,7 @@ type PickupItem = {
   startAtUtc: string | null;
   endAtUtc: string | null;
   sourceUrl: string;
+  imageUrl?: string | null;
   note?: string;
 };
 
@@ -49,6 +50,31 @@ function escapeHtml(input: string) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+function resolveMaybeRelativeUrl(baseUrl: string, maybeRelative: string | null | undefined) {
+  if (!maybeRelative) return null;
+  try {
+    return new URL(maybeRelative, baseUrl).toString();
+  } catch {
+    return maybeRelative;
+  }
+}
+
+function extractFirstImageFromHtml(html: string, baseUrl: string) {
+  if (!html) return null;
+  const $ = load(html);
+  const metaImage =
+    $("meta[property='og:image']").attr("content") ??
+    $("meta[name='og:image']").attr("content") ??
+    $("meta[name='twitter:image']").attr("content");
+
+  if (metaImage) {
+    return resolveMaybeRelativeUrl(baseUrl, metaImage);
+  }
+
+  const firstImage = $("img").first().attr("src");
+  return resolveMaybeRelativeUrl(baseUrl, firstImage);
 }
 
 function toUtcIso(params: {
@@ -95,7 +121,7 @@ function parseApiDateWithOffset(raw: string | undefined, offset: string) {
 
 function parseFullRangeWithOffset(text: string, offset: string) {
   const match = text.match(
-    /(\d{4})[./-](\d{1,2})[./-](\d{1,2})\s*(\d{1,2}):(\d{2})(?::\d{2})?[\s\S]{0,80}?(?:~|～|〜|-)\s*(\d{4})[./-](\d{1,2})[./-](\d{1,2})\s*(\d{1,2}):(\d{2})/
+    /(\d{4})[./-](\d{1,2})[./-](\d{1,2})\s*(\d{1,2}):(\d{2})(?::\d{2})?[\s\S]{0,80}?(?:~|\uFF5E|\u301C|\u223C|-)\s*(\d{4})[./-](\d{1,2})[./-](\d{1,2})\s*(\d{1,2}):(\d{2})/
   );
   if (!match) return null;
 
@@ -238,7 +264,7 @@ function decodeBody(bytes: Uint8Array, rawCharset: string | null | undefined) {
 async function fetchBytes(url: string, accept: string) {
   const response = await fetch(url, {
     headers: {
-      "User-Agent": "SubcultureHubPickupCollector/1.2",
+      "User-Agent": "SubcultureHubPickupCollector/1.3",
       Accept: accept
     }
   });
@@ -282,7 +308,8 @@ async function collectGenshin(): Promise<PickupItem[]> {
   for (const item of candidates) {
     const detailUrl = `${base}/getContent?iAppId=32&iInfoId=${item.iInfoId}&sLangKey=en-us`;
     const detail = await fetchJson<{ data?: HoyoDetailItem }>(detailUrl);
-    const content = stripHtml(detail.data?.sContent ?? item.sContent ?? "");
+    const contentHtml = detail.data?.sContent ?? item.sContent ?? "";
+    const content = stripHtml(contentHtml);
     const range = parseFullRangeWithOffset(content, "+08:00");
 
     output.push({
@@ -291,7 +318,8 @@ async function collectGenshin(): Promise<PickupItem[]> {
       title: decodeHtmlEntities(detail.data?.sTitle ?? item.sTitle),
       startAtUtc: range?.startAtUtc ?? parseApiDateWithOffset(item.dtStartTime, "+08:00"),
       endAtUtc: range?.endAtUtc ?? null,
-      sourceUrl: detailUrl
+      sourceUrl: detailUrl,
+      imageUrl: extractFirstImageFromHtml(contentHtml, detailUrl)
     });
   }
   return output;
@@ -306,7 +334,8 @@ async function collectStarRail(): Promise<PickupItem[]> {
 
   const detailUrl = `${base}/getContent?iAppId=34&iInfoId=${latestUpdate.iInfoId}&sLangKey=en-us`;
   const detail = await fetchJson<{ data?: HoyoDetailItem }>(detailUrl);
-  const content = stripHtml(detail.data?.sContent ?? "");
+  const contentHtml = detail.data?.sContent ?? "";
+  const content = stripHtml(contentHtml);
   const names = Array.from(content.matchAll(/5-Star\s+([A-Za-z0-9' .-]+)\s*\(/g)).map((match) => match[1].trim());
   const uniqNames = Array.from(new Set(names)).slice(0, 2);
   const versionEnd = content.match(/until\s+(\d{4})\/(\d{1,2})\/(\d{1,2})\s*(\d{1,2}):(\d{2})\s*\(UTC\+8\)/i);
@@ -336,6 +365,7 @@ async function collectStarRail(): Promise<PickupItem[]> {
       startAtUtc: parseApiDateWithOffset(detail.data?.dtStartTime ?? latestUpdate.dtStartTime, "+08:00"),
       endAtUtc,
       sourceUrl: detailUrl,
+      imageUrl: extractFirstImageFromHtml(contentHtml, detailUrl),
       note: "Parsed from latest official update notice."
     }
   ];
@@ -353,7 +383,8 @@ async function collectZZZ(): Promise<PickupItem[]> {
   for (const item of candidates) {
     const detailUrl = `${base}/getContent?iAppId=42&iInfoId=${item.iInfoId}&sLangKey=en-us`;
     const detail = await fetchJson<{ data?: HoyoDetailItem }>(detailUrl);
-    const content = stripHtml(detail.data?.sContent ?? item.sContent ?? "");
+    const contentHtml = detail.data?.sContent ?? item.sContent ?? "";
+    const content = stripHtml(contentHtml);
     const range = parseFullRangeWithOffset(content, "+08:00");
 
     output.push({
@@ -362,7 +393,8 @@ async function collectZZZ(): Promise<PickupItem[]> {
       title: decodeHtmlEntities(detail.data?.sTitle ?? item.sTitle),
       startAtUtc: range?.startAtUtc ?? parseApiDateWithOffset(detail.data?.dtStartTime ?? item.dtStartTime, "+08:00"),
       endAtUtc: range?.endAtUtc ?? null,
-      sourceUrl: detailUrl
+      sourceUrl: detailUrl,
+      imageUrl: extractFirstImageFromHtml(contentHtml, detailUrl)
     });
   }
   return output;
@@ -381,6 +413,7 @@ async function collectBlueArchive(): Promise<PickupItem[]> {
     const text = stripHtml(detail.content ?? "");
     const startAtUtc = new Date((detail.createDate ?? thread.createDate) * 1000).toISOString();
     const endAtUtc = parseBlueArchiveEndRange(text, startAtUtc);
+    const sourceUrl = `https://forum.nexon.com/bluearchive/board_view?thread=${thread.threadId}`;
 
     output.push({
       game: "Blue Archive",
@@ -388,7 +421,8 @@ async function collectBlueArchive(): Promise<PickupItem[]> {
       title: decodeHtmlEntities(detail.title ?? thread.title),
       startAtUtc,
       endAtUtc,
-      sourceUrl: `https://forum.nexon.com/bluearchive/board_view?thread=${thread.threadId}`
+      sourceUrl,
+      imageUrl: extractFirstImageFromHtml(detail.content ?? "", sourceUrl)
     });
   }
   return output;
@@ -431,7 +465,8 @@ async function collectProjectSekaiGlobal(): Promise<PickupItem[]> {
       title: decodeHtmlEntities(title),
       startAtUtc: range?.startAtUtc ?? null,
       endAtUtc: range?.endAtUtc ?? null,
-      sourceUrl: detailUrl
+      sourceUrl: detailUrl,
+      imageUrl: extractFirstImageFromHtml(html, detailUrl)
     });
   }
   return output;
@@ -469,7 +504,8 @@ async function collectFGO(): Promise<PickupItem[]> {
       title: decodeHtmlEntities(item.title),
       startAtUtc: range?.startAtUtc ?? null,
       endAtUtc: range?.endAtUtc ?? null,
-      sourceUrl: detailUrl
+      sourceUrl: detailUrl,
+      imageUrl: extractFirstImageFromHtml(detailHtml, detailUrl)
     });
   }
   return output;
@@ -481,32 +517,42 @@ function toMarkdown(items: PickupItem[]) {
   lines.push("");
   lines.push(`Generated at: ${new Date().toISOString()}`);
   lines.push("");
-  lines.push("| Game | Region | Title | Start (UTC) | End (UTC) | Source |");
-  lines.push("|---|---|---|---|---|---|");
+  lines.push("| Game | Region | Title | Start (UTC) | End (UTC) | Source | Image |");
+  lines.push("|---|---|---|---|---|---|---|");
 
   for (const item of items) {
     const safeTitle = (item.note ? `${item.title} (${item.note})` : item.title).replace(/\|/g, "\\|");
     lines.push(
-      `| ${item.game} | ${item.region} | ${safeTitle} | ${item.startAtUtc ?? "-"} | ${item.endAtUtc ?? "-"} | ${item.sourceUrl} |`
+      `| ${item.game} | ${item.region} | ${safeTitle} | ${item.startAtUtc ?? "-"} | ${item.endAtUtc ?? "-"} | ${item.sourceUrl} | ${
+        item.imageUrl ?? "-"
+      } |`
     );
   }
 
+  lines.push("");
+  lines.push("\n> Images are embedded from official notice pages. Copyright belongs to each publisher.");
   lines.push("");
   return lines.join("\n");
 }
 
 function toHtml(items: PickupItem[]) {
-  const rows = items
+  const cards = items
     .map((item) => {
       const title = item.note ? `${item.title} (${item.note})` : item.title;
-      return `<tr>
-  <td>${escapeHtml(item.game)}</td>
-  <td>${escapeHtml(item.region)}</td>
-  <td>${escapeHtml(title)}</td>
-  <td>${escapeHtml(item.startAtUtc ?? "-")}</td>
-  <td>${escapeHtml(item.endAtUtc ?? "-")}</td>
-  <td><a href="${escapeHtml(item.sourceUrl)}" target="_blank" rel="noreferrer">source</a></td>
-</tr>`;
+      const image = item.imageUrl
+        ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.game)}" loading="lazy" referrerpolicy="no-referrer" />`
+        : `<div class="placeholder">NO IMAGE</div>`;
+
+      return `<article class="card">
+  <div class="thumb">${image}</div>
+  <div class="content">
+    <p class="kicker">${escapeHtml(item.game)} · ${escapeHtml(item.region)}</p>
+    <h3>${escapeHtml(title)}</h3>
+    <p><strong>Start:</strong> ${escapeHtml(item.startAtUtc ?? "-")}</p>
+    <p><strong>End:</strong> ${escapeHtml(item.endAtUtc ?? "-")}</p>
+    <p><a href="${escapeHtml(item.sourceUrl)}" target="_blank" rel="noreferrer">Open Official Notice</a></p>
+  </div>
+</article>`;
     })
     .join("\n");
 
@@ -517,32 +563,25 @@ function toHtml(items: PickupItem[]) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pickup Snapshot</title>
   <style>
-    body { font-family: "Noto Sans KR", "Segoe UI", sans-serif; margin: 24px; color: #1d2a2a; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #d8d0c2; padding: 8px; vertical-align: top; text-align: left; }
-    th { background: #f4efe6; }
-    tr:nth-child(even) { background: #fcfaf5; }
-    a { color: #0e7f6d; text-decoration: none; }
+    :root { --bg:#fbf8f3; --ink:#172a34; --muted:#5a6b76; --line:#d5dbe2; --card:#ffffff; --accent:#006f8f; }
+    body { font-family: "Noto Sans KR", "Segoe UI", sans-serif; margin: 24px; color: var(--ink); background: radial-gradient(circle at 10% 0%, #f3f8ff, transparent 40%), var(--bg); }
+    .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    .card { border: 1px solid var(--line); background: var(--card); border-radius: 14px; overflow: hidden; }
+    .thumb { aspect-ratio: 16/9; background: #eef3f8; }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .placeholder { width:100%; height:100%; display:grid; place-items:center; color: var(--muted); font-size: 12px; }
+    .content { padding: 12px; }
+    .kicker { color: var(--muted); margin: 0 0 4px; font-size: 13px; }
+    h3 { margin: 0 0 8px; font-size: 17px; line-height: 1.35; }
+    p { margin: 4px 0; font-size: 13px; }
+    a { color: var(--accent); text-decoration: none; }
   </style>
 </head>
 <body>
   <h1>Pickup Snapshot</h1>
   <p>Generated at: ${escapeHtml(new Date().toISOString())}</p>
-  <table>
-    <thead>
-      <tr>
-        <th>Game</th>
-        <th>Region</th>
-        <th>Title</th>
-        <th>Start (UTC)</th>
-        <th>End (UTC)</th>
-        <th>Source</th>
-      </tr>
-    </thead>
-    <tbody>
-${rows}
-    </tbody>
-  </table>
+  <p>Images are loaded from official notice pages. Copyright belongs to each publisher.</p>
+  <section class="grid">${cards}</section>
 </body>
 </html>`;
 }

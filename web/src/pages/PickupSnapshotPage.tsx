@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getPickupSnapshotLatest, isApiError, PickupSnapshot } from "../api";
 import { formatDate } from "../ui";
 
@@ -19,17 +19,33 @@ export function PickupSnapshotPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const grouped = useMemo(() => {
+    const map = new Map<string, PickupSnapshot["items"]>();
+    for (const item of snapshot?.items ?? []) {
+      const key = `${item.game} (${item.region})`;
+      const current = map.get(key) ?? [];
+      current.push(item);
+      map.set(key, current);
+    }
+    return Array.from(map.entries());
+  }, [snapshot]);
+
   return (
     <section className="section">
-      <h2>Pickup Snapshot</h2>
-      <p className="muted">수집 테스트 결과를 웹에서 UTF-8로 그대로 확인하는 화면입니다.</p>
+      <div className="panel hero mini-hero reveal">
+        <p className="hero-kicker">Pickup Snapshot</p>
+        <h2>공식 공지 기반 수집 테스트</h2>
+        <p className="hero-copy">
+          원문 URL 기준으로 최신 픽업 공지를 모아서 보여줍니다. 이미지가 있는 경우 원본 페이지 이미지 URL을 그대로 사용합니다.
+        </p>
+      </div>
 
       {loading ? <p className="panel">Loading pickup snapshot...</p> : null}
       {error ? <p className="panel error-text">{error}</p> : null}
 
       {!loading && !error && snapshot ? (
         <>
-          <div className="panel">
+          <div className="panel reveal">
             <p className="meta">
               <strong>Report:</strong> {snapshot.file}
             </p>
@@ -39,48 +55,41 @@ export function PickupSnapshotPage() {
             <p className="meta">
               <strong>Items:</strong> {snapshot.itemCount}
             </p>
+            <p className="muted">{snapshot.copyrightNotice}</p>
             {snapshot.failures.length > 0 ? (
-              <div>
-                <strong>Failures</strong>
-                <ul className="simple-list">
-                  {snapshot.failures.map((failure) => (
-                    <li key={failure}>{failure}</li>
-                  ))}
-                </ul>
-              </div>
+              <ul className="simple-list">
+                {snapshot.failures.map((failure) => (
+                  <li key={failure}>{failure}</li>
+                ))}
+              </ul>
             ) : null}
           </div>
 
-          <div className="panel table-wrap">
-            <table className="snapshot-table">
-              <thead>
-                <tr>
-                  <th>Game</th>
-                  <th>Region</th>
-                  <th>Title</th>
-                  <th>Start (UTC)</th>
-                  <th>End (UTC)</th>
-                  <th>Source</th>
-                </tr>
-              </thead>
-              <tbody>
-                {snapshot.items.map((item) => (
-                  <tr key={`${item.game}-${item.sourceUrl}`}>
-                    <td>{item.game}</td>
-                    <td>{item.region}</td>
-                    <td>{item.note ? `${item.title} (${item.note})` : item.title}</td>
-                    <td>{item.startAtUtc ? formatDate(item.startAtUtc) : "TBD"}</td>
-                    <td>{item.endAtUtc ? formatDate(item.endAtUtc) : "TBD"}</td>
-                    <td>
-                      <a href={item.sourceUrl} target="_blank" rel="noreferrer">
-                        source
-                      </a>
-                    </td>
-                  </tr>
+          {grouped.map(([group, items]) => (
+            <div className="panel reveal" key={group}>
+              <h3>{group}</h3>
+              <div className="spotlight-grid">
+                {items.map((item) => (
+                  <article className="spotlight-card" key={`${item.game}-${item.sourceUrl}`}>
+                    <div className="spotlight-thumb">
+                      {item.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.title} loading="lazy" referrerPolicy="no-referrer" />
+                      ) : (
+                        <div className="spotlight-fallback">{item.game}</div>
+                      )}
+                    </div>
+                    <p className="spotlight-title">{item.note ? `${item.title} (${item.note})` : item.title}</p>
+                    <p className="meta">
+                      {formatDate(item.startAtUtc)} - {formatDate(item.endAtUtc)}
+                    </p>
+                    <a href={item.sourceUrl} target="_blank" rel="noreferrer">
+                      공식 공지 열기
+                    </a>
+                  </article>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </div>
+            </div>
+          ))}
         </>
       ) : null}
     </section>
